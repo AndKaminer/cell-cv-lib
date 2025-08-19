@@ -11,8 +11,9 @@ import tqdm
 import numpy as np
 import pandas as pd
 
+
 class InferencePipeline:
-    
+
     def __init__(self, model, framerate, window_width, scaling_factor, um_per_pixel, output_folder):
         self.model = model
         self.framerate = framerate
@@ -25,9 +26,8 @@ class InferencePipeline:
 
         self.process_queue = deque()
 
-
     def process_video(self, video_path, scatter=False, verbose=False, avi=True, csv=True, include_plots=True):
-        self.tracked_contours = {} 
+        self.tracked_contours = {}
 
         video_name = os.path.basename(video_path)
         if self.output_folder:
@@ -49,7 +49,12 @@ class InferencePipeline:
             cap.release()
             raise ValueError("Cannot read frames from the video.")
         frame = cv2.resize(frame, (width, height), cv2.INTER_NEAREST)
-        cap.set(cv2.CAP_PROP_POS_FRAMES, 0) 
+        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
+        try:
+            print(f"Model device: {next(self.model.parameters()).device}", flush=True)
+        except Exception:
+            pass
 
         if avi:
             if include_plots:
@@ -76,12 +81,12 @@ class InferencePipeline:
                 self.tracked_contours[cur_frame] = contour.tolist()
 
             dh.update_data(area=img.get_parameter('area'),
-                        perimeter=img.get_parameter('perimeter'),
-                        height=img.get_parameter('height'),
-                        circularity=img.get_parameter('circularity'),
-                        ypos=img.get_parameter('ypos'),
-                        taylor=img.get_parameter('taylor'),
-                        centerX=img.get_parameter('centerX'))
+                           perimeter=img.get_parameter('perimeter'),
+                           height=img.get_parameter('height'),
+                           circularity=img.get_parameter('circularity'),
+                           ypos=img.get_parameter('ypos'),
+                           taylor=img.get_parameter('taylor'),
+                           centerX=img.get_parameter('centerX'))
 
             if dh.prev_data['centerX']:
                 centerX = max(dh.prev_data['centerX'], self.window_width)
@@ -102,7 +107,6 @@ class InferencePipeline:
             video.release()
 
         return dh.data
-
 
     def get_tracked_contours(self):
         return self.tracked_contours.copy()
