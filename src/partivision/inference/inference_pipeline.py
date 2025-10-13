@@ -14,7 +14,7 @@ import pandas as pd
 
 class InferencePipeline:
 
-    def __init__(self, model, framerate, window_width, scaling_factor, um_per_pixel, output_folder):
+    def __init__(self, model, framerate, window_width, scaling_factor, um_per_pixel, output_folder, show_bounding_box=False):
         self.model = model
         self.framerate = framerate
         self.scaling_factor = scaling_factor
@@ -23,6 +23,7 @@ class InferencePipeline:
         self.window_width = window_width
         self.progress = 0
         self.tracked_contours = {}
+        self.show_bounding_box = show_bounding_box
 
         self.process_queue = deque()
 
@@ -75,6 +76,9 @@ class InferencePipeline:
 
             img = ProcessedImage(frame, centerX, self.window_width, self.scaling_factor, self.um_per_pixel, self.model)
             contour = img.get_contour()
+            if self.show_bounding_box:
+                pt1, pt2 = img.get_bounds()
+                cv2.rectangle(frame, pt1, pt2, (0, 255, 0), 2)
 
             if contour is not None:
                 cv2.drawContours(frame, [contour], -1, (0, 255, 0), 1)

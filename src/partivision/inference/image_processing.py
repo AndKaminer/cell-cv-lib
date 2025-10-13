@@ -46,6 +46,11 @@ class ProcessedImage:
         )
         return measurement
 
+    def get_bounds(self):
+        new_left, new_right = Util.get_bounds(self.frame, self.centerX, self.window_width)
+        h = self.frame.shape[0]
+        return ((new_left, 0), (new_right, h))
+
     def get_contour(self):
         new_window = Util.get_window(self.frame, self.centerX, self.window_width)
         if new_window is None:

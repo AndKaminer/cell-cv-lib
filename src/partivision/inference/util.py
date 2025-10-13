@@ -94,15 +94,19 @@ class Util:
         img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)
         return img
 
-    def get_window(frame, centerX, window_width):
+    def get_bounds(frame, centerX, window_width):
         new_left = max(0, centerX - window_width)
         new_right = min(frame.shape[1], centerX + window_width)
 
         if new_left == 0:
-            new_right = min(frame.shape[1], window_width)
+            new_right = min(frame.shape[1], centerX + window_width)
         elif new_right == frame.shape[1]:
-            new_left == max(0, frame.shape[1] - window_width)
+            new_left == max(0, frame.shape[1] - (centerX + window_width))
 
+        return new_left, new_right
+
+    def get_window(frame, centerX, window_width):
+        new_left, new_right = Util.get_bounds(frame, centerX, window_width)
         new_img = frame[:, new_left:new_right]
 
         return new_img
